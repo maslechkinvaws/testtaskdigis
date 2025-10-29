@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { createTypeormModule } from './database/typeorm.provider';
+import { createConfigModule } from './config/config-module.provider';
+import { RecordModule } from './modules/record/record.module';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    createTypeormModule({ loadMigrations: true }),
+    createConfigModule(),
+    RecordModule,
+  ],
 })
 export class AppModule {}

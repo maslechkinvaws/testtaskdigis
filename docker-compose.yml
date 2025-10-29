@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  postgres:
+    container_name: postgres_digis
+    platform: linux/amd64
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-digisdb}
+      POSTGRES_USER: ${DB_USERNAME:-digisuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-digispassword}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    volumes:
+      - database_data:/var/lib/postgresql/data:rw
+    networks:
+      - digis_net
+
+  api:
+    container_name: nestjs_digis
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-digisdb}
+      DB_USERNAME: ${DB_USERNAME:-digisuser}
+      DB_PASSWORD: ${DB_PASSWORD:-digispassword}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - digis_net
+    command: npm run start:dev
+    volumes:
+      - .:/app:delegated
+      - ./node_modules:/app/node_modules
+
+volumes:
+  database_data:
+
+networks:
+  digis_net:
+
